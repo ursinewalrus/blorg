@@ -1,0 +1,63 @@
+/* some style */
+//mixin for indent
+.page-body{
+
+    width: 100%;
+    
+    .title-area{
+        width: 50%;
+        margin-right: auto;
+	margin-left: auto;
+        .title-text{
+            position: absolute;
+            top: 17%;
+        }
+        
+    }
+
+    .center-area{
+	width: 50%;
+	margin-right: auto;
+	margin-left: auto;
+        padding-top: 20px;
+        
+        .post-content{
+            padding: 10px;// @content-indent;
+            
+            .post-comments{
+                padding: 15px;
+            }
+
+        }
+        
+
+    }
+    
+    .post-image{
+	width: 50%;
+	height: auto;
+    }
+}
+
+
+
+.post-title-link{
+    .post-title{
+        height: 1.5em;
+        width: 100%;
+    }
+}
+
+.form-label{
+    font-size: 2em;
+}
+.post-tags{
+    width: 80%;
+}
+.blorg-form{
+    height: 400px;
+    overflow-y: scroll-y;
+}
+.hidden-element{
+    display: none !important;
+}
