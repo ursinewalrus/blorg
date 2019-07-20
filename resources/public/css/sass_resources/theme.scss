@@ -2,6 +2,9 @@
 //mixin for indent
 .page-body{
 
+    .logins-div{
+        display: flex;
+    }
     width: 100%;
     
     .title-area{
@@ -39,7 +42,13 @@
     }
 }
 
-
+.comment{
+    border-style: dotted;
+    
+    .comment-author{
+        font-weight: bold;
+    }
+}
 
 .post-title-link{
     .post-title{

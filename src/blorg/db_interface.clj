@@ -21,12 +21,13 @@
                             "username"
                             "admin"
                             (.toCharArray "password"));if youre gonna put this on git...
-                           
                            )))
-(defn blorg-context
+#_(defn blorg-context
   []
-  (monger/get-db @db-context "blorg")
+  (monger/get-db (monger/connect) "blorg")
 )
+
+(defonce blorg-context (atom (monger/get-db (monger/connect) "blorg")))
 
 (defmacro users-col
   "query params"
@@ -96,6 +97,7 @@
             (generate-session-token-for-user user)
             (do
               (-> 
+               ;creates google user
                (users-col mc/save-and-return {:email (get data "email") :username (get data "name") :image (get data "picture") :sub (get data "sub")})
                (generate-session-token-for-user)
                )
@@ -114,7 +116,7 @@
 (defn validate-post-req
 "if a valid post returns the post, if not returns a {:error 'message'}"
   [post-params]
-  (let [valid-req (mc/find-one-as-map (blorg-context) "blorg_users" {$and [{:username (:post-auth-user post-params)} {:token (:post-auth-token post-params)}]} )]
+  (let [valid-req (mc/find-one-as-map (blorg-context) "blorg_users" {$and [{:username (:auth-user post-params)} {:token (:auth-token post-params)}]} )]
     (if (contains? valid-req :username)
       (if (< (compare (str (t/now)) (:token-expire valid-req)) 0)
         post-params
@@ -132,19 +134,20 @@
        valid-post#
        ~insert-fn)))
 
-(defn insert-comment
+(defn insert-comment ; need to get the poster's image
   [comment-params]
-  (let [post (mc/find-one-as-map (blorg-context) "posts" {:title (:post-auth-extra-post-title comment-params)})]
+  (let [post (mc/find-one-as-map (blorg-context) "posts" {:title (:title comment-params)})]
     (insert-content comment-params
                     (do (mc/update-by-id (blorg-context) "posts" (:_id post) 
-                                         {$addToSet {:comments {:user (:post-auth-user comment-params)  
+                                         {$addToSet {:comments {:user (:auth-user comment-params)  
+                                                                :user-image (:image (users-col mc/find-one-as-map {:username (:auth-user comment-params)}))
                                                                 :comment (:comment comment-params) 
                                                                 :timestamp (str (t/now))}} })  
                         {:success "Comment added"}))))
 
 (defn insert-post
    [post-params]
-  (if (logged-in-user-is-admin (:post-auth-token post-params))
+  (if (logged-in-user-is-admin (:post-auth-token post-params)); and validate-post-req
     (insert-content post-params (do
                    (mc/save (blorg-context) "posts"
                             {:title (:title post-params) 

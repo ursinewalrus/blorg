@@ -5,10 +5,12 @@
    #?( :clj [clj-uuid :as uuid])
    #?( :clj [clj-http.client :as http])
    #?( :clj [blorg.config :as config])
-   #? (:clj [clj-time.core :as t])
-   #? (:clj [clj-time.coerce :as tc])
+   #?( :clj [clj-time.core :as t])
+   #?( :clj [clj-time.coerce :as tc])
+   #?( :clj [cheshire.core :refer :all])
+   #?( :cljs [blorg.app_state :as as])
+   #?( :cljs [reagent.core :as r])
    #?( :cljs [goog.net.cookies :as cks])
-   #? (:clj [cheshire.core :refer :all])
 ))
 ;overkill for this kind of thing but why not
 (def cookie-keys {
@@ -83,8 +85,8 @@
 #?(
  :cljs
  [(defn general-input
-     "type id name label require input-type  default-values & classes"
-     [type id name label require input-type  stateful-val & classes]
+     "type id name label require input-type  default-values keys-vect & classes"
+     [type id name label require input-type  stateful-val keys-vect & classes]
      [:div {:class "form-group"}
       [:div 
        [:label {:for (str name " input-label form-label") :class "form-label"} label
@@ -94,8 +96,11 @@
               :name name
               :class (clojure.string/join " " classes)
               require "true"
-              :value stateful-val
+              :value (if (= (count keys-vect) 0) 
+                       stateful-val 
+                       (reduce #(-> %1 %2) @stateful-val keys-vect))
               :type input-type
+              :on-change #(swap! stateful-val assoc-in keys-vect (-> % .-target .-value))
               }]])
 
   (defn set-auth-cookie
@@ -104,6 +109,8 @@
     ;maybe change to use the reagent-utils cookies
     (.set goog.net.cookies (:auth-user cookie-keys) (auth-hash "user") 21600)
     (.set goog.net.cookies (:auth-token cookie-keys) (auth-hash "token") 21600) ;uh...12 hours?
+    (swap! as/app-state assoc-in [:form-components :auth-user] (auth-hash "user") )
+    (swap! as/app-state assoc-in [:form-components :auth-token] (auth-hash "token"))
     (if (= refresh :refresh)
         (set! (.-href window.location) window.location));...make it pass along where you actually wanted to go
     )

@@ -1,6 +1,8 @@
 /* some style */
 .page-body {
   width: 100%; }
+  .page-body .logins-div {
+    display: flex; }
   .page-body .title-area {
     width: 50%;
     margin-right: auto;
@@ -20,6 +22,11 @@
   .page-body .post-image {
     width: 50%;
     height: auto; }
+
+.comment {
+  border-style: dotted; }
+  .comment .comment-author {
+    font-weight: bold; }
 
 .post-title-link .post-title {
   height: 1.5em;

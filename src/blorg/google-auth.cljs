@@ -2,6 +2,7 @@
   (:require [blorg.utils :as butils]
             [reagent.core :as r]
             [blorg.utils :as butils]
+            [blorg.app_state :as as]
             [blorg.api_handling :as api-handler]
 ))
 
@@ -14,6 +15,7 @@
   (let [g-token (.. google-user (getAuthResponse) -id_token)]
     (butils/set-gauth-cookie g-token)
     (api-handler/log-in-oauth-user {:query-params {:type "google" :token  g-token} :with-credentials? false})
+    (swap! as/app-state assoc :login-state true)
 ))
 
 (defn create-oauth-button-g

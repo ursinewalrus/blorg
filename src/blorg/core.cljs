@@ -1,12 +1,12 @@
 (ns blorg.core
     (:require 
      [reagent.core :as r]
-     [cljs-http.client :as http]
-     [cljs.core.async :refer [<!]]
      [blorg.api_handling :as api_handler]
      [blorg.add_posts :as add_posts]
      [blorg.utils :as butils]
      [blorg.google_auth :as bga]
+     [blorg.app_state :as as]
+     [goog.net.cookies :as cks]
      )
     (:require-macros [cljs.core.async.macros :refer [go]])
 )
@@ -17,7 +17,6 @@
 
  ;(defonce app-state (atom {:text "Hello world!"}))
 
-(defonce app-state (r/atom {:posts nil :posts-ready true :comments (str "") :login-state nil}))
 ; (defn on-js-reload []
 ;   ;; optionally touch your app-state to force rerendering depending on
 ;   ;; your application
@@ -70,6 +69,7 @@
       [:div {:class "comment-author"} (:user comment)] ;maybe a link?
       [:div {:class "comment-content"} (:comment comment)]
       [:div {:class "comment-time"} (:timestamp comment)]
+      [:img {:class "comment-author-img" :src (:user-image comment)}]
       ])])
 
 
@@ -85,7 +85,7 @@
 (defn render-posts
   []
   [:div {:class "posts-container center-area"} 
-    (for [post (:posts @app-state)]
+    (for [post (:posts (deref as/app-state))]
         ^{:key (:_id post)}[:div {:class "peanut post"} 
                             [:div {:class "post-content"} 
                              [butils/post-link [:h4 {:class "post-title"} (:title post)] (:title post)]
@@ -95,9 +95,9 @@
                                  [butils/post-link [:div {:class "comments-link"} (str (count (:comments post)) " comments")] (:title post)]
                                  )
                                (do
-                                 [:<>
+                                 [:<> {:app-state (:login-state (deref as/app-state))}
                                   (if (not (= nil  (.get goog.net.cookies (:auth-google butils/cookie-keys))))
-                                    ^{:key (str "comment-" (:_id post))} [add_posts/comment-form (:title post)  (:comments app-state)]
+                                    ^{:key (str "comment-" (:_id post))} [add_posts/comment-form (:title post)]
                                     [:div {:class "post-comment-login"} "Log in to comment"]
                                     )
                                   (comments-comp (:comments post))]
@@ -107,14 +107,20 @@
                              ]
                             [:hr {:class "post-seperator"}]])])
 
+(defn site-sign-in-comp
+  []
+  [:button {:class "site-log-in-btn half-btn squared"} "Log In"]
+)
+
 (defn render-header
   []
-  [:div {:class "header bacon jagged2"}
-   [:<>
-     [bga/google-auth-comp] ;give this a way to reset on app state, maybe actually make app state a new NS, so everyone can access it
-    ;(bga/google-auth-comp)
-    [:h1 {:class "title-area bacon"} 
-     [:span {:class "title-text  lime-text"} "Scrustinomicon"]]]])
+[:<>
+ [:div {:class "logins-div"}
+  [site-sign-in-comp] 
+  [bga/google-auth-comp]] 
+ [:div {:class "header bacon jagged2"}
+  [:h1 {:class "title-area bacon"} 
+   [:span {:class "title-text  lime-text"} "Scrustinomicon"]]]])
 
 ;test-posts from monger or something later
 (defn create-page
@@ -123,9 +129,10 @@
       [render-header]
       (cond
         ;this whole setup seems dubious
-        (check-page "posts-page") (do (api_handler/get-posts app-state) [render-posts])
+        (check-page "posts-page") (do (api_handler/get-posts) [render-posts])
         (check-page "single-post") (do  
-                                     (api_handler/post-retrieve app-state "/single-post" {:title  (butils/get-qs-param-value "title")}) 
+                                     (api_handler/post-retrieve as/app-state "/single-post" {:title  (butils/get-qs-param-value "title")}) 
+                                     (swap! as/app-state assoc-in [:form-components :title] (butils/get-qs-param-value "title"))
                                      [render-posts]
                                      )
         (check-page "add-posts") [add_posts/add-post]
