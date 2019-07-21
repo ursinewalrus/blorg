@@ -11,25 +11,9 @@
 ))
 
 
-
-#_(defonce post-inputs (r/atom
-                      {
-                       :title (str "")
-                       :content (str "")
-                       :tags (str "")
-                       :auth-user (.get goog.net.cookies (:auth-user butils/cookie-keys))
-                       :auth-token (.get goog.net.cookies (:auth-token butils/cookie-keys))
-                       :auth-google (.get goog.net.cookies (:auth-google butils/cookie-keys butils/cookie-keys))
-                       }))
-                                        ;probs should be its own ns...
-#_(defonce auth-inputs (r/atom  {
-                               :username (str "")
-                               :password (str "")
-                              }))
-
 (defn auth-elements
   ([extras]
-   [:div {:class "hidden-element" :app-state (:app-state (:login-state (deref as/app-state)))}
+   [:div {:class "hidden-element"}
     (butils/general-input :input "auth-user" "post-auth-user" ""  :require "text" as/app-state [:form-components :auth-user] "form-group" "post-auth-user")
     (butils/general-input :input "auth-token" "post-auth-token" ""  :require "text" as/app-state [:form-components :auth-token] "form-group" "post-auth-token")
     (for [[extra-k extra-v] extras] (butils/general-input :input (str "post-auth-extra-" extra-k)  (str "post-auth-extra-" extra-k) "" :require "text" extra-v [] "form-group" (str "post-auth-" extra-k) ))
@@ -50,18 +34,24 @@
     ]])
 
 
+(defn comment-form-submit-callback
+  [e]
+ (.preventDefault e)
+  (api-handler/send-post-request "/submit-comment" 
+                                 (into (:form-components @as/app-state) {:comment (:comment @as/app-state)})
+                                 api-handler/post-retrieve 
+                                 ["/single-post" {:title  (butils/get-qs-param-value "title")}])
+  ;clear the form and something idk 
+)
+
 (defn comment-form
   [id]
-  [:form {:class "comment-form padding" :method :post :action "/submit-comment" :on-submit (fn [e]
-                                                                                              (.preventDefault e)
-                                                                                             ;validate it
-                                                                                             (prn "submitting comment")
-                                                                                             (api-handler/send-post-request "/submit-comment" (into (:form-components @as/app-state) {:comment (:comment @as/app-state)}))
-                                                                                             )}
-   (butils/general-input :textarea "comment" "comment"  "Comment" :require "text" as/app-state [:comment] "comment-form" "form-group")
-   (auth-elements {"post-title" id})
-   [:button {:type :submit :class "squared half-btn"} "Submit Comment"]
-])
+  ^{:key (str "comment-form-" id)} [:form {:class "comment-form padding" :method :post :action "/submit-comment" :on-submit comment-form-submit-callback}
+                                    ^{:key (str "comment-input-id-" id)} 
+                                    (butils/general-input :textarea "comment" "comment"  "Comment" :require "text" as/app-state [:comment] "comment-form" "form-group")
+       (auth-elements {"post-title" id})
+       [:button {:type :submit :class "squared half-btn"} "Submit Comment"]
+       ])
 
 ;for admin sign in
 (defn auth-form

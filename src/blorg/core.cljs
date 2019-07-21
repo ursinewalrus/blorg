@@ -1,7 +1,7 @@
 (ns blorg.core
     (:require 
      [reagent.core :as r]
-     [blorg.api_handling :as api_handler]
+     [blorg.api_handling :as api-handler]
      [blorg.add_posts :as add_posts]
      [blorg.utils :as butils]
      [blorg.google_auth :as bga]
@@ -59,7 +59,7 @@
 (defn append-container
   [target]
   (.appendChild target (doto (.createElement js/document "div"))))
-;look up how to do this with map, also maybe a macro?
+
 (defn comments-comp 
   [comments-vect]
   [:div {:class "post-comments " :id "comments-ancor"}
@@ -95,7 +95,7 @@
                                  [butils/post-link [:div {:class "comments-link"} (str (count (:comments post)) " comments")] (:title post)]
                                  )
                                (do
-                                 [:<> {:app-state (:login-state (deref as/app-state))}
+                                 [:<> 
                                   (if (not (= nil  (.get goog.net.cookies (:auth-google butils/cookie-keys))))
                                     ^{:key (str "comment-" (:_id post))} [add_posts/comment-form (:title post)]
                                     [:div {:class "post-comment-login"} "Log in to comment"]
@@ -129,9 +129,9 @@
       [render-header]
       (cond
         ;this whole setup seems dubious
-        (check-page "posts-page") (do (api_handler/get-posts) [render-posts])
+        (check-page "posts-page") (do (api-handler/get-posts) [render-posts])
         (check-page "single-post") (do  
-                                     (api_handler/post-retrieve as/app-state "/single-post" {:title  (butils/get-qs-param-value "title")}) 
+                                     (api-handler/post-retrieve "/single-post" {:title  (butils/get-qs-param-value "title")}) 
                                      (swap! as/app-state assoc-in [:form-components :title] (butils/get-qs-param-value "title"))
                                      [render-posts]
                                      )

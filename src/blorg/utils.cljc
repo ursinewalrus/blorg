@@ -87,21 +87,21 @@
  [(defn general-input
      "type id name label require input-type  default-values keys-vect & classes"
      [type id name label require input-type  stateful-val keys-vect & classes]
-     [:div {:class "form-group"}
-      [:div 
-       [:label {:for (str name " input-label form-label") :class "form-label"} label
-        ]]
-      [type  {
-              :id id
-              :name name
-              :class (clojure.string/join " " classes)
-              require "true"
-              :value (if (= (count keys-vect) 0) 
-                       stateful-val 
-                       (reduce #(-> %1 %2) @stateful-val keys-vect))
-              :type input-type
-              :on-change #(swap! stateful-val assoc-in keys-vect (-> % .-target .-value))
-              }]])
+     ^{:key (str "input-id-" id)} [:div {:class "form-group"}
+          [:div 
+           [:label {:for (str name " input-label form-label") :class "form-label"} label
+            ]]
+          [type  {
+                  :id id
+                  :name name
+                  :class (clojure.string/join " " classes)
+                  require "true"
+                  :value (if (= (count keys-vect) 0) 
+                           stateful-val 
+                           (reduce #(-> %1 %2) @stateful-val keys-vect))
+                  :type input-type
+                  :on-change #(swap! stateful-val assoc-in keys-vect (-> % .-target .-value))
+                  }]])
 
   (defn set-auth-cookie
     [auth-hash & refresh]

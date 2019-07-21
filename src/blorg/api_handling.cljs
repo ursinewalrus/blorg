@@ -17,16 +17,15 @@
   []
   (go (let [response (<! (http/post "/posts" {:with-credentials? false :query-params {}}))]
         (swap! as/app-state assoc :posts  (:body response))
-        #_(prn "THIS IS THE STATE")
-        #_(prn as/app-state)
         )))
 
 (defn post-retrieve
-  [post-state endpoint params]
+  [endpoint params]
+  (prn endpoint)
+  (prn params)
   (go (let [response (<! (http/post endpoint {:query-params params}))]
-        #_(prn (str  "making post call to " endpoint " with " params))
-        #_(prn (str "response was "  (:body response)))
-        (swap! post-state assoc :posts (:body response))
+        (prn "doin the swap")
+        (swap! as/app-state assoc :posts (:body response))
         )))
 
 (defn send-auth-request
@@ -58,18 +57,24 @@
          )
 )))
 
-(defn send-post-request
-  [endpoint data]
-  (prn data)
-  (go (let [response (<! (http/post endpoint {:with-credentials? false :query-params data}))]
-        (prn (:body response))
-        )))
-;maaaybe
-(defn handle-return-validation
-  "db_interface passes back code to be executed if response contains specified params?"
-  [post-response]
 
-)
+(defn handle-return-validation
+  [post-response]
+  (if (contains? post-response :error)
+    false
+    true
+))
+
+(defn send-post-request
+  [endpoint data callback & cb-arg-vect]
+  (go (let [response (<! (http/post endpoint {:with-credentials? false :query-params data}))]
+        (if (handle-return-validation (:body response))
+          (do
+           ;(post-retrieve "/single-post" {:title  (butils/get-qs-param-value "title")}) ; really bad obvi, should be a callback or something
+            (apply callback (flatten cb-arg-vect))
+            )
+))))
+
 
 (defmacro handle-post-error
   [post-error]

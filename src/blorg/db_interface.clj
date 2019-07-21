@@ -22,12 +22,15 @@
                             "admin"
                             (.toCharArray "password"));if youre gonna put this on git...
                            )))
-#_(defn blorg-context
+
+(defonce blorg-context-atom (atom (monger/get-db (monger/connect) "blorg")))
+(defn blorg-context
   []
-  (monger/get-db (monger/connect) "blorg")
+  @blorg-context-atom
+  #_(monger/get-db (monger/connect) "blorg")
 )
 
-(defonce blorg-context (atom (monger/get-db (monger/connect) "blorg")))
+
 
 (defmacro users-col
   "query params"
