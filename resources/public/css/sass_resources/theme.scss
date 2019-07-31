@@ -2,6 +2,10 @@
 //mixin for indent
 .page-body{
 
+    .top{
+        display: flex;
+    }
+
     .logins-div{
         display: flex;
     }
@@ -18,7 +22,7 @@
         
     }
 
-    .center-area{
+    #center-area{
 	width: 50%;
 	margin-right: auto;
 	margin-left: auto;
@@ -44,9 +48,37 @@
 
 .comment{
     border-style: dotted;
-    
-    .comment-author{
-        font-weight: bold;
+    display: flex;
+
+    .comment-text{
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        .comment-author{
+            font-weight: bold;
+            margin-top: 5px;
+            margin-left: 5px;
+        }
+
+        .comment-content{
+            margin: 10px;
+        }
+        .comment-time{
+            margin-bottom: 5px;
+            margin-left: 5px;
+        }
+
+    }
+
+    .comment-author-img{
+        margin-left: auto;
+        margin-right: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        max-height: 96px;
+                         
     }
 }
 
@@ -69,4 +101,14 @@
 }
 .hidden-element{
     display: none !important;
+}
+
+
+.grid-tools{
+    display: flex;
+}
+
+#grid-canvas{
+   // width: 100%;
+    background-color: white;
 }

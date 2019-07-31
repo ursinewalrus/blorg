@@ -1,6 +1,8 @@
 /* some style */
 .page-body {
   width: 100%; }
+  .page-body .top {
+    display: flex; }
   .page-body .logins-div {
     display: flex; }
   .page-body .title-area {
@@ -10,23 +12,41 @@
     .page-body .title-area .title-text {
       position: absolute;
       top: 17%; }
-  .page-body .center-area {
+  .page-body #center-area {
     width: 50%;
     margin-right: auto;
     margin-left: auto;
     padding-top: 20px; }
-    .page-body .center-area .post-content {
+    .page-body #center-area .post-content {
       padding: 10px; }
-      .page-body .center-area .post-content .post-comments {
+      .page-body #center-area .post-content .post-comments {
         padding: 15px; }
   .page-body .post-image {
     width: 50%;
     height: auto; }
 
 .comment {
-  border-style: dotted; }
-  .comment .comment-author {
-    font-weight: bold; }
+  border-style: dotted;
+  display: flex; }
+  .comment .comment-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; }
+    .comment .comment-text .comment-author {
+      font-weight: bold;
+      margin-top: 5px;
+      margin-left: 5px; }
+    .comment .comment-text .comment-content {
+      margin: 10px; }
+    .comment .comment-text .comment-time {
+      margin-bottom: 5px;
+      margin-left: 5px; }
+  .comment .comment-author-img {
+    margin-left: auto;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    max-height: 96px; }
 
 .post-title-link .post-title {
   height: 1.5em;
@@ -44,5 +64,11 @@
 
 .hidden-element {
   display: none !important; }
+
+.grid-tools {
+  display: flex; }
+
+#grid-canvas {
+  background-color: white; }
 
 /*# sourceMappingURL=theme.css.map */

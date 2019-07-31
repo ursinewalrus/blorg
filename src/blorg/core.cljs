@@ -5,6 +5,7 @@
      [blorg.add_posts :as add_posts]
      [blorg.utils :as butils]
      [blorg.google_auth :as bga]
+     [blorg.grid :as grid]
      [blorg.app_state :as as]
      [goog.net.cookies :as cks]
      )
@@ -66,9 +67,10 @@
    (for [comment comments-vect]
      ^{:key (str (:user comment) "-" (:timestamp comment))}
      [:div {:class "comment"}
-      [:div {:class "comment-author"} (:user comment)] ;maybe a link?
-      [:div {:class "comment-content"} (:comment comment)]
-      [:div {:class "comment-time"} (:timestamp comment)]
+      [:div {:class "comment-text"}
+       [:div {:class "comment-author"} (:user comment)] ;maybe a link?
+       [:div {:class "comment-content"} (:comment comment)]
+       [:div {:class "comment-time"} (:timestamp comment)]]
       [:img {:class "comment-author-img" :src (:user-image comment)}]
       ])])
 
@@ -84,7 +86,7 @@
 
 (defn render-posts
   []
-  [:div {:class "posts-container center-area"} 
+  [:div {:class "posts-container"} 
     (for [post (:posts (deref as/app-state))]
         ^{:key (:_id post)}[:div {:class "peanut post"} 
                             [:div {:class "post-content"} 
@@ -115,20 +117,23 @@
 (defn render-header
   []
 [:<>
- [:div {:class "logins-div"}
-  [site-sign-in-comp] 
-  [bga/google-auth-comp]] 
+ [:div {:class "top"} [:<> [:div {:class "logins-div"}
+                               [site-sign-in-comp] 
+                               [bga/google-auth-comp]]
+                          [:a {:class "header-link" :href "/grid"} "THE GRID"]
+]] 
  [:div {:class "header bacon jagged2"}
   [:h1 {:class "title-area bacon"} 
-   [:span {:class "title-text  lime-text"} "Scrustinomicon"]]]])
+   [:a  {:href "/"} [:span {:class "title-text  lime-text"} "Scrustinomicon"]]]]])
 
 ;test-posts from monger or something later
 (defn create-page
   []
     [:div {:class "page-body"}
       [render-header]
+     [:div {:id "center-area"}
       (cond
-        ;this whole setup seems dubious
+                                        ;this whole setup seems dubious
         (check-page "posts-page") (do (api-handler/get-posts) [render-posts])
         (check-page "single-post") (do  
                                      (api-handler/post-retrieve "/single-post" {:title  (butils/get-qs-param-value "title")}) 
@@ -137,7 +142,8 @@
                                      )
         (check-page "add-posts") [add_posts/add-post]
         (check-page "auth-page") [add_posts/auth-page]
-        :else "FOUR OH FOUR")
+        (check-page "grid") [grid/grid-comp]
+        :else "FOUR OH FOUR")]
      (side-bar)
      ]
      

@@ -37,6 +37,7 @@
                                          "add-posts "
                                          "auth-page"
                                          ))
+                (= route "grid") "grid"
                 :else "404"
                 )}] 
       ;[:script {:src "js/compiled/google-api.js" :async "async" :defer "defer"}]
@@ -52,12 +53,12 @@
                                                                          {:token (butils/extract-cookies _ "token")
                                                                           :user  (butils/extract-cookies _ "user")
                                                                           }))
-  (GET "/post*" {params :query-params} (render "single-post" params) )
+  (GET "/post*" {params :query-params} (render "single-post" params))
+  (GET "/grid" _ (render "grid" _))
   (POST "/submit-post" {:keys [params]} (generate-string (bdb/insert-post params)))
   (POST "/submit-comment"  {:keys [params]} (generate-string (bdb/insert-comment params)))
   (POST "/auth-user"  {:keys [params]} (bdb/authenticate-user (:username params) (digest/md5  (:password params))));admins hit this direct
-  (POST "/log-in-oauth-user" {:keys [params]} (bdb/validate-oauth-user params)
-        )
+  (POST "/log-in-oauth-user" {:keys [params]} (bdb/validate-oauth-user params))
   (POST "/posts" {:keys [params]}  {:status 200 
                                :headers {"Content-Type" "application/json"}
                                :body (generate-string (bdb/get-all-posts params))})
